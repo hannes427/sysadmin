@@ -400,7 +400,7 @@ bool check_systemd_networkd (const std::string interface) {
     bool systemd = false;
     if(!std::filesystem::exists("/sys/class/net/"+interface)) {
         std::cerr<<std::endl<<"Error! Could not open interface file! Is "<<interface<<" a valid network interface?"<<std::endl<<std::endl;
-        std::abort;
+        std::abort();
     }
     else {
         if (check_netplan(interface)) {
