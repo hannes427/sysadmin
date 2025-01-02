@@ -11,11 +11,13 @@ add_executable(hostname hostname.cpp)
 add_executable(change_dns change_dns.cpp)
 add_executable(network network.cpp)
 add_executable(set_timezone timezone.cpp)
+add_executable(get_netplan_config get_netplan_config.cpp)
 
 target_link_libraries(packet_capture Boost::program_options mysqlclient)
 target_link_libraries(hostname Boost::program_options mysqlclient)
 target_link_libraries(change_dns Boost::program_options mysqlclient)
 target_link_libraries(network Boost::program_options mysqlclient)
 target_link_libraries(set_timezone Boost::program_options mysqlclient)
+target_link_libraries(get_netplan_config Boost::program_options mysqlclient)
 
 install(TARGETS packet_capture RUNTIME DESTINATION bin)
