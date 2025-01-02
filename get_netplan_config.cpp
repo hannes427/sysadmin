@@ -3,8 +3,23 @@
 #include "functions.hpp"
 #include <boost/program_options.hpp>
 
+void replaceAll(std::string& str, const std::string& from, const std::string& to) {
+    if(from.empty())
+        return;
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+    }
+}
+
 int main (int argc, char **argv) {
     std::string interface;
+    std::string dhcp4;
+    std::string dhcp6;
+    std::string ip_address;
+    std::string routes;
+    std::string accept_ra;
     int current_uid = getuid();
     try {
         boost::program_options::options_description desc{"Options"};
@@ -29,6 +44,41 @@ int main (int argc, char **argv) {
         std::cerr << ex.what() << '\n';
         return 1;
     }
-
+     if (setuid(0)) { //I am now root!
+        perror("setuid");
+        return 1;
+    }
+    std::string dhcp4_cmd = "/usr/sbin/netplan get network.ethernets."+interface+".dhcp4";
+    dhcp4 = exec(dhcp4_cmd.c_str());
+    dhcp4.pop_back(); //remove last \n from string
+    dhcp4.erase(std::remove(dhcp4.begin(), dhcp4.end(), '-'), dhcp4.end());
+    dhcp4.erase(std::remove(dhcp4.begin(), dhcp4.end(), ' '), dhcp4.end());
+    replaceAll(dhcp4, "\n", ", ");
+    std::string dhcp6_cmd = "/usr/sbin/netplan get network.ethernets."+interface+".dhcp6";
+    dhcp6 = exec(dhcp6_cmd.c_str());
+    dhcp6.pop_back(); //remove last \n from string
+    dhcp6.erase(std::remove(dhcp6.begin(), dhcp6.end(), '-'), dhcp6.end());
+    dhcp6.erase(std::remove(dhcp6.begin(), dhcp6.end(), ' '), dhcp6.end());
+    replaceAll(dhcp6, "\n", ", ");
+    std::string ip_address_cmd = "/usr/sbin/netplan get network.ethernets."+interface+".addresses";
+    ip_address = exec(ip_address_cmd.c_str());
+    ip_address.pop_back(); //remove last \n from string
+    ip_address.erase(std::remove(ip_address.begin(), ip_address.end(), '-'), ip_address.end());
+    ip_address.erase(std::remove(ip_address.begin(), ip_address.end(), ' '), ip_address.end());
+    replaceAll(ip_address, "\n", ", ");
+    std::string routes_cmd = "/usr/sbin/netplan get network.ethernets."+interface+".routes";
+    routes = exec(routes_cmd.c_str());
+    routes.pop_back(); //remove last \n from string
+    routes.erase(std::remove(routes.begin(), routes.end(), '-'), routes.end());
+    routes.erase(std::remove(routes.begin(), routes.end(), ' '), routes.end());
+    replaceAll(routes, "\n", ", ");
+    std::string accept_ra_cmd = "/usr/sbin/netplan get network.ethernets."+interface+".accept-ra";
+    accept_ra = exec(accept_ra_cmd.c_str());
+    accept_ra.pop_back(); //remove last \n from string
+    accept_ra.erase(std::remove(accept_ra.begin(), accept_ra.end(), '-'), accept_ra.end());
+    accept_ra.erase(std::remove(accept_ra.begin(), accept_ra.end(), ' '), accept_ra.end());
+    replaceAll(accept_ra, "\n", ", ");
+    setuid(current_uid); //return to previous user
+    std::cout<<"dhcp4: "<<dhcp4<<std::endl<<"dhcp6: "<<dhcp6<<std::endl<<"ip_address: "<<ip_address<<std::endl<<"routes: "<<routes<<std::endl<<"accept_ra: "<<accept_ra<<std::endl;
     return 0;
 }
