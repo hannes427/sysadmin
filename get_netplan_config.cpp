@@ -9,11 +9,13 @@ std::string dhcp6;
 std::string ip_address;
 std::string routes;
 std::string accept_ra;
+bool check_interface = false;
 int current_uid = getuid();
 
 void replaceAll (std::string& str, const std::string& from, const std::string& to) {
-    if(from.empty())
+    if(from.empty()) {
         return;
+    }
     size_t start_pos = 0;
     while((start_pos = str.find(from, start_pos)) != std::string::npos) {
         str.replace(start_pos, from.length(), to);
@@ -21,10 +23,16 @@ void replaceAll (std::string& str, const std::string& from, const std::string& t
     }
 }
 
-std::string check_configured (std::string interface) {
+int check_configured (std::string interface) {
+    int is_configured = 0;
     std::string check_cmd = "/usr/sbin/netplan get network.ethernets."+interface;
     std::string check = exec(check_cmd.c_str());
-    return check;
+    check.erase(std::remove(check.begin(), check.end(), '\n'), check.end());
+    if (check == "null") {
+        is_configured = 1;
+    }
+
+    return is_configured;
 }
 
 int main (int argc, char **argv) {
@@ -48,7 +56,9 @@ int main (int argc, char **argv) {
             interface = vm["interface"].as<std::string>();
         }
         if (vm.count("check_configured")) {
-            check_configured (interface);
+            check_interface = true;
+            int result = check_configured (interface);
+            std::cout<<result<<std::endl;
         }
     }
     catch (const boost::program_options::error &ex) {
@@ -59,6 +69,8 @@ int main (int argc, char **argv) {
         perror("setuid");
         return 1;
     }
+    if (!check_interface) {
+        std::cout<<"Fahre forrtt..."<<std::endl;
     std::string dhcp4_cmd = "/usr/sbin/netplan get network.ethernets."+interface+".dhcp4";
     dhcp4 = exec(dhcp4_cmd.c_str());
     //remove unwanted chars from string (last \n, -, spaces and '"')
@@ -101,5 +113,6 @@ int main (int argc, char **argv) {
     replaceAll(accept_ra, "\n", ", ");
     setuid(current_uid); //return to previous user
     std::cout<<"dhcp4: "<<dhcp4<<std::endl<<"dhcp6: "<<dhcp6<<std::endl<<"ip_address: "<<ip_address<<std::endl<<"routes: "<<routes<<std::endl<<"accept_ra: "<<accept_ra<<std::endl;
+    }
     return 0;
 }
