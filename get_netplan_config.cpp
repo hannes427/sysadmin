@@ -70,48 +70,48 @@ int main (int argc, char **argv) {
         return 1;
     }
     if (!check_interface) {
-    std::string dhcp4_cmd = "/usr/sbin/netplan get network.ethernets."+interface+".dhcp4";
-    dhcp4 = exec(dhcp4_cmd.c_str());
+        std::string dhcp4_cmd = "/usr/sbin/netplan get network.ethernets."+interface+".dhcp4";
+        dhcp4 = exec(dhcp4_cmd.c_str());
+        //remove unwanted chars from string (last \n, -, spaces and '"')
+        dhcp4.pop_back();
+        dhcp4.erase(std::remove(dhcp4.begin(), dhcp4.end(), '-'), dhcp4.end());
+        dhcp4.erase(std::remove(dhcp4.begin(), dhcp4.end(), ' '), dhcp4.end());
+        dhcp4.erase(std::remove(dhcp4.begin(), dhcp4.end(), '"'), dhcp4.end());
+        replaceAll(dhcp4, "\n", ", ");
+        std::string dhcp6_cmd = "/usr/sbin/netplan get network.ethernets."+interface+".dhcp6";
+        dhcp6 = exec(dhcp6_cmd.c_str());
     //remove unwanted chars from string (last \n, -, spaces and '"')
-    dhcp4.pop_back();
-    dhcp4.erase(std::remove(dhcp4.begin(), dhcp4.end(), '-'), dhcp4.end());
-    dhcp4.erase(std::remove(dhcp4.begin(), dhcp4.end(), ' '), dhcp4.end());
-    dhcp4.erase(std::remove(dhcp4.begin(), dhcp4.end(), '"'), dhcp4.end());
-    replaceAll(dhcp4, "\n", ", ");
-    std::string dhcp6_cmd = "/usr/sbin/netplan get network.ethernets."+interface+".dhcp6";
-    dhcp6 = exec(dhcp6_cmd.c_str());
-   //remove unwanted chars from string (last \n, -, spaces and '"')
-    dhcp6.pop_back();
-    dhcp6.erase(std::remove(dhcp6.begin(), dhcp6.end(), '-'), dhcp6.end());
-    dhcp6.erase(std::remove(dhcp6.begin(), dhcp6.end(), ' '), dhcp6.end());
-    dhcp6.erase(std::remove(dhcp6.begin(), dhcp6.end(), '"'), dhcp6.end());
-    replaceAll(dhcp6, "\n", ", ");
-    std::string ip_address_cmd = "/usr/sbin/netplan get network.ethernets."+interface+".addresses";
-    ip_address = exec(ip_address_cmd.c_str());
-    //remove unwanted chars from string (last \n, -, spaces and '"')
-    ip_address.pop_back();
-    ip_address.erase(std::remove(ip_address.begin(), ip_address.end(), '-'), ip_address.end());
-    ip_address.erase(std::remove(ip_address.begin(), ip_address.end(), ' '), ip_address.end());
-    ip_address.erase(std::remove(ip_address.begin(), ip_address.end(), '"'), ip_address.end());
-    replaceAll(ip_address, "\n", ", ");
-    std::string routes_cmd = "/usr/sbin/netplan get network.ethernets."+interface+".routes";
-    routes = exec(routes_cmd.c_str());
-    //remove unwanted chars from string (last \n, -, spaces and '"')
-    routes.pop_back();
-    routes.erase(std::remove(routes.begin(), routes.end(), '-'), routes.end());
-    routes.erase(std::remove(routes.begin(), routes.end(), ' '), routes.end());
-    routes.erase(std::remove(routes.begin(), routes.end(), '"'), routes.end());
-    replaceAll(routes, "\n", ", ");
-    std::string accept_ra_cmd = "/usr/sbin/netplan get network.ethernets."+interface+".accept-ra";
-    accept_ra = exec(accept_ra_cmd.c_str());
-    //remove unwanted chars from string (last \n, -, spaces and '"')
-    accept_ra.pop_back();
-    accept_ra.erase(std::remove(accept_ra.begin(), accept_ra.end(), '-'), accept_ra.end());
-    accept_ra.erase(std::remove(accept_ra.begin(), accept_ra.end(), ' '), accept_ra.end());
-    accept_ra.erase(std::remove(accept_ra.begin(), accept_ra.end(), '"'), accept_ra.end());
-    replaceAll(accept_ra, "\n", ", ");
-    setuid(current_uid); //return to previous user
-    std::cout<<"dhcp4: "<<dhcp4<<std::endl<<"dhcp6: "<<dhcp6<<std::endl<<"ip_address: "<<ip_address<<std::endl<<"routes: "<<routes<<std::endl<<"accept_ra: "<<accept_ra<<std::endl;
+        dhcp6.pop_back();
+        dhcp6.erase(std::remove(dhcp6.begin(), dhcp6.end(), '-'), dhcp6.end());
+        dhcp6.erase(std::remove(dhcp6.begin(), dhcp6.end(), ' '), dhcp6.end());
+        dhcp6.erase(std::remove(dhcp6.begin(), dhcp6.end(), '"'), dhcp6.end());
+        replaceAll(dhcp6, "\n", ", ");
+        std::string ip_address_cmd = "/usr/sbin/netplan get network.ethernets."+interface+".addresses";
+        ip_address = exec(ip_address_cmd.c_str());
+        //remove unwanted chars from string (last \n, -, spaces and '"')
+        ip_address.pop_back();
+        ip_address.erase(std::remove(ip_address.begin(), ip_address.end(), '-'), ip_address.end());
+        ip_address.erase(std::remove(ip_address.begin(), ip_address.end(), ' '), ip_address.end());
+        ip_address.erase(std::remove(ip_address.begin(), ip_address.end(), '"'), ip_address.end());
+        replaceAll(ip_address, "\n", ", ");
+        std::string routes_cmd = "/usr/sbin/netplan get network.ethernets."+interface+".routes";
+        routes = exec(routes_cmd.c_str());
+        //remove unwanted chars from string (last \n, -, spaces and '"')
+        routes.pop_back();
+        routes.erase(std::remove(routes.begin(), routes.end(), '-'), routes.end());
+        routes.erase(std::remove(routes.begin(), routes.end(), ' '), routes.end());
+        routes.erase(std::remove(routes.begin(), routes.end(), '"'), routes.end());
+        replaceAll(routes, "\n", ", ");
+        std::string accept_ra_cmd = "/usr/sbin/netplan get network.ethernets."+interface+".accept-ra";
+        accept_ra = exec(accept_ra_cmd.c_str());
+        //remove unwanted chars from string (last \n, -, spaces and '"')
+        accept_ra.pop_back();
+        accept_ra.erase(std::remove(accept_ra.begin(), accept_ra.end(), '-'), accept_ra.end());
+        accept_ra.erase(std::remove(accept_ra.begin(), accept_ra.end(), ' '), accept_ra.end());
+        accept_ra.erase(std::remove(accept_ra.begin(), accept_ra.end(), '"'), accept_ra.end());
+        replaceAll(accept_ra, "\n", ", ");
+        setuid(current_uid); //return to previous user
+        std::cout<<"dhcp4: "<<dhcp4<<std::endl<<"dhcp6: "<<dhcp6<<std::endl<<"ip_address: "<<ip_address<<std::endl<<"routes: "<<routes<<std::endl<<"accept_ra: "<<accept_ra<<std::endl;
     }
     return 0;
 }
