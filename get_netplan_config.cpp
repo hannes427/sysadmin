@@ -3,7 +3,15 @@
 #include "functions.hpp"
 #include <boost/program_options.hpp>
 
-void replaceAll(std::string& str, const std::string& from, const std::string& to) {
+std::string interface;
+std::string dhcp4;
+std::string dhcp6;
+std::string ip_address;
+std::string routes;
+std::string accept_ra;
+int current_uid = getuid();
+
+void replaceAll (std::string& str, const std::string& from, const std::string& to) {
     if(from.empty())
         return;
     size_t start_pos = 0;
@@ -13,19 +21,19 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
     }
 }
 
+std::string check_configured (std::string interface) {
+    std::string check_cmd = "/usr/sbin/netplan get network.ethernets."+interface;
+    std::string check = exec(check_cmd.c_str());
+    return check;
+}
+
 int main (int argc, char **argv) {
-    std::string interface;
-    std::string dhcp4;
-    std::string dhcp6;
-    std::string ip_address;
-    std::string routes;
-    std::string accept_ra;
-    int current_uid = getuid();
     try {
         boost::program_options::options_description desc{"Options"};
         desc.add_options()
         ("help,h", "Help screen")
-        ("interface", boost::program_options::value<std::string>()->required(), "Name of the interface (e.g. eth0)");
+        ("interface", boost::program_options::value<std::string>()->required(), "Name of the interface (e.g. eth0)")
+        ("check_configured", "Check if configuration for this interface exists)");
 
         boost::program_options::variables_map vm;
         boost::program_options::command_line_style::allow_long_disguise;
@@ -38,6 +46,9 @@ int main (int argc, char **argv) {
         }
         if (vm.count("interface")) {
             interface = vm["interface"].as<std::string>();
+        }
+        if (vm.count("check_configured")) {
+            check_configured (interface);
         }
     }
     catch (const boost::program_options::error &ex) {
