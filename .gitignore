@@ -1,1 +1,7 @@
 build/
+.kdev4
+*~
+*.swp
+.*kate-swp
+.*.kdev4
+
