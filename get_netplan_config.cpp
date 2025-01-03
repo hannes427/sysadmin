@@ -70,7 +70,6 @@ int main (int argc, char **argv) {
         return 1;
     }
     if (!check_interface) {
-        std::cout<<"Fahre forrtt..."<<std::endl;
     std::string dhcp4_cmd = "/usr/sbin/netplan get network.ethernets."+interface+".dhcp4";
     dhcp4 = exec(dhcp4_cmd.c_str());
     //remove unwanted chars from string (last \n, -, spaces and '"')
