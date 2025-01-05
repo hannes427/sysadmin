@@ -92,9 +92,7 @@ int create_ifupdown_file(bool unconfigured, std::string interface, std::string i
         }
     }
     if (interface_file != "") { //file for this interface exists in /etc/network/interfaces.d
-        std::cout<<"Hallo du da"<<std::endl;
         if(!unconfigured) {
-            std::cout<<"Debug1"<<std::endl;
             dns_server = get_nameserver(interface_file, "dns-nameservers", " ");
             std::vector<std::string> nameservers = split(dns_server, " ");
             for(int i = 0; i < nameservers.size(); i++) {
@@ -119,10 +117,8 @@ int create_ifupdown_file(bool unconfigured, std::string interface, std::string i
             }
         }
         else {
-            std::cout<<"Debug2"<<std::endl;
             nameservers_cmd = "/usr/bin/grep dns-nameservers /etc/network/interfaces";
             dns_server = get_nameserver("/etc/network/interfaces", "dns-nameservers", " ");
-            std::cout<<"dns_server: "<<dns_server<<std::endl;
             std::vector<std::string> nameservers = split(dns_server, " ");
             for(int i = 0; i < nameservers.size(); i++) {
                 if(is_ipv4_address((nameservers[i]))) {
@@ -163,7 +159,6 @@ int create_ifupdown_file(bool unconfigured, std::string interface, std::string i
             file<<"gateway "<<ipv4_gateway<<std::endl;
         }
         if (ipv4_nameserver != "" and ipv4_address != "") {
-            std::cout<<"Debug 456 "<<ipv4_nameserver<<std::endl;
             file<<"dns-nameservers "<<ipv4_nameserver<<std::endl;
             if (search != "") {
                 file<<"dns-search "<<search<<std::endl;
@@ -197,9 +192,7 @@ int create_ifupdown_file(bool unconfigured, std::string interface, std::string i
         file.close();
     }
     else {
-        std::cout<<"Test123456789"<<std::endl;
         dns_server = get_nameserver("/etc/network/interfaces", "dns-nameservers", " ");
-        std::cout<<"dns_server: "<<dns_server<<std::endl;
         std::vector<std::string> nameservers = split(dns_server, " ");
         for(int i = 0; i < nameservers.size(); i++) {
             if(is_ipv4_address((nameservers[i]))) {
@@ -221,9 +214,7 @@ int create_ifupdown_file(bool unconfigured, std::string interface, std::string i
         if (!search.empty() && search[search.length()-1] == ' ') {
             search.erase(search.length()-1);
         }
-        std::cout<<"Debug123 "<<ipv4_nameserver<<std::endl;
         remove_interface (interface);
-        std::cout<<"Hallo e"<<ipv4_nameserver<<std::endl;
         interface_file = "/etc/network/interfaces.d/"+interface;
         std::ofstream file;
         file.open(interface_file);
@@ -243,7 +234,6 @@ int create_ifupdown_file(bool unconfigured, std::string interface, std::string i
             file<<"gateway "<<ipv4_gateway<<std::endl;
         }
         if (ipv4_nameserver != "" and ipv4_address != "") {
-            std::cout<<"Debug 456 "<<ipv4_nameserver<<std::endl;
             file<<"dns-nameservers "<<ipv4_nameserver<<std::endl;
             if (search != "") {
                 file<<"dns-search "<<search<<std::endl;
@@ -513,12 +503,10 @@ int main (int argc, char **argv) {
         ("help,h", "Help screen")
         ("interface", boost::program_options::value<std::string>()->required(), "name of the interface")
         ("connection", boost::program_options::value<std::string>(), "NetworkManager connection (if NetworkManager is used")
-        ("ipv4-address", boost::program_options::value<std::string>(), "IPv4 address")
-        ("ipv4-netmask", boost::program_options::value<std::string>(), "Ipv4 subnetmask")
+        ("ipv4-address", boost::program_options::value<std::string>(), "IPv4 address/netmask (IP/MASK")
         ("ipv4-gateway", boost::program_options::value<std::string>(), "IPv4 default gateway")
         ("ipv4-assignment", boost::program_options::value<std::string>()->required(), "Method to set IPv4 addres (valid input: static, dhcp or unconfigured")
         ("ipv6-address", boost::program_options::value<std::string>(), "IPv6 address")
-        ("ipv6-netmask", boost::program_options::value<std::string>(), "Ipv6 subnetmask")
         ("ipv6-gateway", boost::program_options::value<std::string>(), "IPv6 default gateway")
         ("ipv6-assignment", boost::program_options::value<std::string>()->required(), "Method to set IPv6 addres (valid input: static, dhcp, auto or unconfigured")
         ("ipv6-autoconf", boost::program_options::value<std::string>(), "Use ipv6 autoconf (0=off, 1=on)")
@@ -540,10 +528,25 @@ int main (int argc, char **argv) {
             connection = vm["connection"].as<std::string>();
         }
         if (vm.count("ipv4-address")) {
-            ipv4_address = vm["ipv4-address"].as<std::string>();
-        }
-        if (vm.count("ipv4-netmask")) {
-            ipv4_netmask = vm["ipv4-netmask"].as<std::string>();
+            std::vector<std::string> temp_ipv4_address = split(vm["ipv4-address"].as<std::string>(), "/");
+            if (temp_ipv4_address.size() <= 1) {
+                std::cerr<<std::endl<<"Error! Invalid ipv4 format: "<<ipv4_address<<"Please supply address and netmask (format: ip/netmask)"<<std::endl<<std::endl;
+                return 1;
+            }
+            if(is_ipv4_address((temp_ipv4_address[0]))) {
+                ipv4_address = temp_ipv4_address[0];
+                if (temp_ipv4_address[1].find_first_not_of("0123456789") != std::string::npos) {
+                    std::cerr<<std::endl<<"Error! Invalid Netmask supplied: "<<temp_ipv4_address[1]<<std::endl<<std::endl;
+                    return 1;
+                }
+                else {
+                    ipv4_netmask = temp_ipv4_address[1];
+                }
+            }
+            else {
+                std::cerr<<std::endl<<"Error! Invalid IPv4 address! "<<ipv4_address<<std::endl<<std::endl;
+                return 1;
+            }
         }
         if (vm.count("ipv4-assignment")) {
             if (vm["ipv4-assignment"].as<std::string>() == "static") {
@@ -564,10 +567,25 @@ int main (int argc, char **argv) {
             ipv4_gateway = vm["ipv4-gateway"].as<std::string>();
         }
         if (vm.count("ipv6-address")) {
-            ipv6_address = vm["ipv6-address"].as<std::string>();
-        }
-        if (vm.count("ipv6-netmask")) {
-            ipv6_netmask = vm["ipv6-netmask"].as<std::string>();
+        std::vector<std::string> temp_ipv6_address = split(vm["ipv6-address"].as<std::string>(), "/");
+            if (temp_ipv6_address.size() <= 1) {
+                std::cerr<<std::endl<<"Error! Invalid ipv6 format: "<<ipv6_address<<"Please supply address and netmask (format: ip/netmask)"<<std::endl<<std::endl;
+                return 1;
+            }
+            if(is_ipv6_address((temp_ipv6_address[0]))) {
+                ipv6_address = temp_ipv6_address[0];
+                if (temp_ipv6_address[1].find_first_not_of("0123456789") != std::string::npos) {
+                    std::cerr<<std::endl<<"Error! Invalid Netmask supplied: "<<temp_ipv6_address[1]<<std::endl<<std::endl;
+                    return 1;
+                }
+                else {
+                    ipv6_netmask = temp_ipv6_address[1];
+                }
+            }
+            else {
+                std::cerr<<std::endl<<"Error! Invalid IPv6 address! "<<ipv6_address<<std::endl<<std::endl;
+                return 1;
+            }
         }
         if (vm.count("ipv6-assignment")) {
             if (vm["ipv6-assignment"].as<std::string>() == "static") {
@@ -622,16 +640,8 @@ int main (int argc, char **argv) {
         std::cerr << ex.what() << '\n';
         return 1;
     }
-    if (ipv4_address != "" and !is_ipv4_address(ipv4_address)) {
-        std::cerr<<std::endl<<"Error! Invalid IPv4 address! "<<ipv4_address<<std::endl<<std::endl;
-        return 1;
-    }
     if (ipv4_gateway != "" and !is_ipv4_address(ipv4_gateway)) {
         std::cerr<<std::endl<<"Error! Invalid IPv4 gateway! "<<ipv4_gateway<<std::endl<<std::endl;
-        return 1;
-    }
-    if (ipv6_address != "" and !is_ipv6_address(ipv6_address)) {
-        std::cerr<<std::endl<<"Error! Invalid IPv6 address! "<<ipv6_address<<std::endl<<std::endl;
         return 1;
     }
      if (ipv6_gateway != "" and !is_ipv6_address(ipv6_gateway)) {
