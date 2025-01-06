@@ -236,7 +236,7 @@ bool check_auth (const std::string module) {
             }
 
             // get the results from executing commands
-            auto result = execSQLQuery(con, "SELECT timestamp from sysadmin WHERE module='"+module+"';");
+            auto result = execSQLQuery(con, "SELECT timestamp from systemadmin_logs WHERE module='"+module+"';");
 
             if (!result.success) {
                 // handle any errors
