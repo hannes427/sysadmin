@@ -78,7 +78,6 @@ int main (int argc, char **argv) {
     catch (const boost::program_options::error &ex) {
         std::cerr << ex.what() << '\n';
     }
-    std::cout<<"From: "<<from_address<<" Storage: "<<storage_address<<std::endl;
     std::string mdadm_command = "/usr/bin/dpkg -L mdadm >> /dev/null 2>&1";
     int check_mdadm = system(mdadm_command.c_str());
     if (check_mdadm == 0) {
