@@ -1,4 +1,5 @@
 build/
+debian/
 .kdev4
 *~
 *.swp
