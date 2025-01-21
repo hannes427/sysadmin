@@ -7,3 +7,4 @@ test/
 .*kate-swp
 .*.kdev4
 *.kdev4
+*.sh
