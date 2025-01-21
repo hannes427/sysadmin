@@ -26,3 +26,11 @@ target_link_libraries(email_settings Boost::program_options mysqlclient)
 
 
 install(TARGETS packet_capture RUNTIME DESTINATION bin)
+install(TARGETS powermgmt RUNTIME DESTINATION bin)
+install(TARGETS hostname RUNTIME DESTINATION bin)
+install(TARGETS change_dns RUNTIME DESTINATION bin)
+install(TARGETS network RUNTIME DESTINATION bin)
+install(TARGETS set_timezone RUNTIME DESTINATION bin)
+install(TARGETS get_netplan_config RUNTIME DESTINATION bin)
+install(TARGETS notifications RUNTIME DESTINATION bin)
+install(TARGETS email_settings RUNTIME DESTINATION bin)
