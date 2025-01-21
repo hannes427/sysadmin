@@ -1,0 +1,10 @@
+/home/hannes/debbuild/systemadmin/usr/local/freepbx/bin/packet_capture
+/home/hannes/debbuild/systemadmin/usr/local/freepbx/bin/powermgmt
+/home/hannes/debbuild/systemadmin/usr/local/freepbx/bin/set_hostname
+/home/hannes/debbuild/systemadmin/usr/local/freepbx/bin/change_dns
+/home/hannes/debbuild/systemadmin/usr/local/freepbx/bin/network
+/home/hannes/debbuild/systemadmin/usr/local/freepbx/bin/set_timezone
+/home/hannes/debbuild/systemadmin/usr/local/freepbx/bin/get_netplan_config
+/home/hannes/debbuild/systemadmin/usr/local/freepbx/bin/notifications
+/home/hannes/debbuild/systemadmin/usr/local/freepbx/bin/email_settings
+/home/hannes/debbuild/systemadmin/usr/local/freepbx/bin/get_raid

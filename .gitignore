@@ -8,3 +8,4 @@ test/
 .*.kdev4
 *.kdev4
 *.sh
+CMakeFiles
