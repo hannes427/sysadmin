@@ -1,28 +1,27 @@
 #include <iostream>
 #include <unistd.h>
-#include <sys/reboot.h>
 
 int current_uid = getuid();
 
 int reboot () {
-    sync();
     if (setuid(0)) { //I am now root!
         perror("setuid");
         return 1;
     }
-  reboot(RB_AUTOBOOT);
-  setuid(current_uid);
-  return(0);
+    std::string reboot_cmd = "/usr/bin/systemctl reboot";
+    system(reboot_cmd.c_str());
+    setuid(current_uid);
+    return(0);
 }
 int shutdown () {
-     sync();
      if (setuid(0)) { //I am now root!
         perror("setuid");
         return 1;
     }
-     reboot(RB_POWER_OFF);
-     setuid(current_uid);
-  return(0);
+    std::string reboot_cmd = "/usr/bin/systemctl poweroff";
+    system(reboot_cmd.c_str());
+    setuid(current_uid);
+    return(0);
 }
 int main (int argc, char **argv) {
     if (argc < 2) {
