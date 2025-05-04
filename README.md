@@ -63,11 +63,10 @@ sudo apt install ./systemadmin-1.0.0-Ubuntu22-04.deb
 To compile the packages yourself, run the following commands in a terminal:
 
 ```
-sudo apt install git cmake libboost-program-options-dev g++ libodb-mysql-dev wget sed
+sudo apt install git cmake libboost-program-options-dev g++ libodb-mysql-dev wget
 cd /tmp
 git clone https://github.com/hannes427/sysadmin
 cd sysadmin
-sed -i 's/mariadb/mysql/' functions.cpp
 cmake CMakeLists.txt -DCMAKE_INSTALL_PREFIX=/usr/local/freepbx
 cmake --build .
 sudo mkdir /usr/local/freepbx && sudo cmake --install . && sudo chmod u+s /usr/local/freepbx/bin/* && sudo cp -rp php /usr/local/freepbx && sudo chmod +x /usr/local/freepbx/php/*.php

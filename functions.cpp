@@ -7,8 +7,8 @@
 #include <stdexcept>
 #include <string>
 #include <boost/program_options.hpp>
-#include <mariadb/mysql.h>
-#include <mariadb/mysqld_error.h>
+#include <mysql/mysql.h>
+#include <mysql/mysqld_error.h>
 #include <tuple>
 #include <ctime>
 #include <sstream>
