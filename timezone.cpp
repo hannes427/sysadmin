@@ -5,7 +5,7 @@
 int main (int argc, char **argv) {
     std::string time_zone;
     int current_uid = getuid();
-    std::regex tzRegex (R"(^[A-Za-z]+\/[A-Za-z_\-]+$)");
+    std::regex tzRegex (R"(^UTC$|^[A-Za-z]+\/[A-Za-z_\-]+$)");
     try {
         boost::program_options::options_description desc{"Options"};
         desc.add_options()

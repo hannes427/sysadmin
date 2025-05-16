@@ -32,7 +32,7 @@ To install the package, plese run the following commands in a shell
 
 ```
 cd /tmp
-wget https://github.com/hannes427/sysadmin/systemadmin-1.0.0-Debian12.deb
+wget https://github.com/hannes427/sysadmin/raw/refs/heads/master/install/systemadmin-1.0.0-Debian12.deb
 su -c 'apt install ./systemadmin-1.0.0-Debian12.deb'
 
 ```
