@@ -22,8 +22,7 @@ int create_netplan_file (bool unconfigured, std::string interface, std::string i
         std::string cmd = "/usr/bin/grep -l "+interface+" /etc/netplan/*.yaml";
         filename = exec(cmd.c_str());
         filename.pop_back();
-        std::filesystem::path p = filename;
-        filename = p.replace_extension();
+        filename = std::filesystem::path(filename).stem();
 //Debug begin
         std::cout<<"Filename is "<<filename<<std::endl;
 //Debig end
