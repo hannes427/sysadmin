@@ -1,4 +1,3 @@
-#include <iostream>
 #include "functions.hpp"
 
 std::string fetch_md_raid (std::string device) {

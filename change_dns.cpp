@@ -66,7 +66,7 @@ int main (int argc, char **argv) {
                 //We have to shutdown all interfaces to update /etc/resolv.conf
                 std::string path = "/sys/class/net/";
                 for (const auto & interface : std::filesystem::directory_iterator(path)) {
-                    if (interface.path().filename() == "lo") {
+                    if (interface.path().filename() == "lo" || interface.path().filename() == "bonding_masters") {
                         continue;
                     }
                     const std::string interface_name = interface.path().filename();
@@ -120,7 +120,7 @@ int main (int argc, char **argv) {
                 std::filesystem::copy(temp_filepath, filepath, std::filesystem::copy_options::update_existing);
                 //Bring up all interfaces
                 for (const auto & interface : std::filesystem::directory_iterator(path)) {
-                    if (interface.path().filename() == "lo") {
+                    if (interface.path().filename() == "lo" || interface.path().filename() == "bonding_masters") {
                         continue;
                     }
                     const std::string interface_name = interface.path().filename();
@@ -161,16 +161,16 @@ int main (int argc, char **argv) {
         }
         std::string path = "/sys/class/net/";
         for (const auto & interface : std::filesystem::directory_iterator(path)) {
-            if (interface.path().filename() == "lo") {
+            if (interface.path().filename() == "lo" || interface.path().filename() == "bonding_masters") {
                 continue;
             }
             const std::string interface_name = interface.path().filename();
-            std::string get_connection_cmd = "/usr/bin/nmcli -t -f GENERAL.CONNECTION dev show "+interface_name+" | /usr/bin/awk -F':' {'print $2'}";
+            std::string get_connection_cmd = "/usr/bin/nmcli -t -f GENERAL.CONNECTION device show "+interface_name+" | /usr/bin/awk -F':' {'print $2'}";
             std::string connection = exec(get_connection_cmd.c_str());
             connection.pop_back();
             if (connection != "") {
                 if (ipv4_nameserver != "") {
-                    std::string ipv4_command = "/usr/bin/nmcli conn modify "+connection+" ipv4.dns \""+ipv4_nameserver+"\"";
+                    std::string ipv4_command = "/usr/bin/nmcli connection modify "+connection+" ipv4.dns \""+ipv4_nameserver+"\"";
                     if (search != "") {
                         ipv4_command += " ipv4.dns-search \""+search+"\"";
                     }
@@ -195,10 +195,6 @@ int main (int argc, char **argv) {
             std::string dns_files = exec(temp_command.c_str());
             std::string search_files = exec(temp_search_command.c_str());
             if (dns_files != "") {
-//Debug start
-            std::cout<<"Found dns entry:"<<std::endl;
-
-//Debug end
                 std::ifstream file;
                 std::ofstream temp_file;
                 std::string temp_filepath = "/tmp/change_dns_servers";
@@ -227,45 +223,21 @@ int main (int argc, char **argv) {
                     while (std::getline(file, line)) {
                         line_counter++;
                         if (std::regex_match(line, delete_dns)) {
-//Debug start
-            std::cout<<"Found dns line"<<std::endl;
-
-//Debug end
                             if (first_match == 0) {
-//Debug start
-            std::cout<<"First match"<<std::endl;
-
-//Debug end
                                 first_match = line_counter;
                                 line = std::regex_replace(line, delete_dns, dns_lines);
                                 if (search_found != 0 && search != "") {
-//Debug start
-            std::cout<<"Found search entry within first match"<<std::endl;
-
-//Debug end
                                     line += "\nDomains="+search;
                                 }
                             }
                             else {
-//Debug start
-            std::cout<<"Found another match"<<std::endl;
-
-//Debug end
                                 continue;
                             }
                         }
                         if (search != "" && search_found == 0) {
-//Debug start
-            std::cout<<"search is not empty and sourch_found is 0"<<std::endl;
-
-//Debug end
                             line = std::regex_replace(line, delete_search, "Domains="+search);
                         }
                         else if (search == "") {
-//Debug start
-            std::cout<<"search is empty"<<std::endl;
-
-//Debug end
                             line = std::regex_replace(line, delete_search, "");
                         }
                         temp_file<<line<<std::endl;
@@ -362,23 +334,32 @@ int main (int argc, char **argv) {
     }
     else if (managed_by == "netplan") {
         std::string path = "/sys/class/net/";
+        std::string type = "ethernets";
         for (const auto & interface : std::filesystem::directory_iterator(path)) {
-            if (interface.path().filename() == "lo") {
+            if (interface.path().filename() == "lo" || interface.path().filename() == "bonding_masters") {
                 continue;
             }
             const std::string interface_name = interface.path().filename();
+            //Check if interface is a bond
+            if (std::filesystem::exists("/sys/class/net/bonding_masters")) {
+                std::string check_bond_cmd = "/usr/bin/grep -q "+interface_name+" /sys/class/net/bonding_masters";
+                int check_bond = system(check_bond_cmd.c_str());
+                if (check_bond == 0) {
+                    type = "bonds";
+                }
+            }
             if (std::filesystem::is_symlink("/etc/resolv.conf")) { //etc/resolv.conf is managed by resolvconf or systemd-resolved
                 std::string interface_command = "/usr/bin/grep -q "+interface_name+" /etc/netplan/*.yaml";
                 int interface_found = std::system(interface_command.c_str());
                 if (interface_found == 0) { //yaml-file for this interface exists
-                    std::string netplan_delete_server = "/usr/sbin/netplan set \"network.ethernets."+interface_name+".nameservers.addresses=null\"";
+                    std::string netplan_delete_server = "/usr/sbin/netplan set \"network."+type+"."+interface_name+".nameservers.addresses=null\"";
                     std::system(netplan_delete_server.c_str());
-                    std::string netplan_add_server = "/usr/sbin/netplan set \"network.ethernets."+interface_name+".nameservers.addresses=["+dns_server+"\"]";
+                    std::string netplan_add_server = "/usr/sbin/netplan set \"network."+type+"."+interface_name+".nameservers.addresses=["+dns_server+"\"]";
                     std::system(netplan_add_server.c_str());
 
-                    std::string netplan_delete_search = "/usr/sbin/netplan set \"network.ethernets."+interface_name+".nameservers.search=null\"";
+                    std::string netplan_delete_search = "/usr/sbin/netplan set \"network."+type+"."+interface_name+".nameservers.search=null\"";
                     std::system(netplan_delete_search.c_str());
-                    std::string netplan_add_search = "/usr/sbin/netplan set \"network.ethernets."+interface_name+".nameservers.search=["+search+"\"]";
+                    std::string netplan_add_search = "/usr/sbin/netplan set \"network."+type+"."+interface_name+".nameservers.search=["+search+"\"]";
                     std::system(netplan_add_search.c_str());
                     std::system("/usr/sbin/netplan apply >> /dev/null 2>&1");
                 }

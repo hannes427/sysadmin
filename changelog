@@ -1,4 +1,9 @@
-systemadmin (1.0.0-3) UNRELEASED; urgency=medium
+systemadmin (1.0.0-4) UNRELEASED; urgency=medium
+  * Add Bond-Support for network
+
+ -- Hannes Rusch <hannes.rusch@web.de>  Mon, 02 June 2025 07:51:58 +0200
+
+ systemadmin (1.0.0-3) UNRELEASED; urgency=medium
   * Update netplan.cpp
 
  -- Hannes Rusch <hannes.rusch@web.de>  Fri, 16 May 2025 09:56:58 +0200

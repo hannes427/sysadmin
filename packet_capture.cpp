@@ -8,16 +8,6 @@
 const std::string MODULE = "packetcapture";
 
 int startcapture (int argc, char **argv) {
-//DEBUG BEGIN
-    std::cout<<"Stsart capture"<<std::endl;
-    if( argc > 1 )
-    {
-        int i;
-        std::cout << "Command line: "<<argv[0]<<" ";
-
-        std::copy( argv+1, argv+argc, std::ostream_iterator<const char*>( std::cout, " " ) ) ;
-    }
-//DEBUG END
    /* Not full implemented yet
     if(!check_auth(MODULE)) {
          std::cerr<<std::endl<<"Error! Authentication failed! Did you run this program from the command line?"<<std::endl<<std::endl;
@@ -44,11 +34,13 @@ int startcapture (int argc, char **argv) {
         boost::program_options::variables_map vm;
         store(parse_command_line(argc, argv, desc), vm);
 
-        notify(vm);
-
         if (vm.count("help")) {
             std::cout << desc << '\n';
+            return 0;
         }
+
+        notify(vm);
+
         if (vm.count("count-bytes")) {
             arguments = arguments+" -c "+vm["count-bytes"].as<std::string>();
         }
@@ -105,9 +97,6 @@ int startcapture (int argc, char **argv) {
         std::cerr << ex.what() << '\n';
     }
     std::string tcpdump = std::string("/usr/bin/tcpdump")+" "+arguments+" "+filter_on+" > /dev/null 2>&1&";
-//DEBUG BEGIN
-    std::cout<<tcpdump<<std::endl;
-//DEBUG END
     if (setuid(0)) { //I am now root!
         perror("setuid");
         return 1;
@@ -139,17 +128,6 @@ int stopcapture (int pid) {
     return 0;
 }
 int main (int argc, char **argv) {
-//DEBUG BEGIN
-    std::cout<<"Warmup..."<<std::endl;
-    if( argc > 1 )
-    {
-        int i;
-        std::cout << "Command line: "<<argv[0]<<" ";
-
-        std::copy( argv+1, argv+argc, std::ostream_iterator<const char*>( std::cout, " " ) ) ;
-    }
-    std::cout<<std::endl<<std::endl<<std::endl;
-//DEBUG END
     if (argc < 2) {
         std::cerr<<std::endl<<"Error! Usage: "<<argv[0]<<" startcapture || stopcapture"<<std::endl<<std::endl;
         return 1;

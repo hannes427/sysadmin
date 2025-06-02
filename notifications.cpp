@@ -1,8 +1,4 @@
-#include <iostream>
-#include <filesystem>
-#include <fstream>
 #include "functions.hpp"
-#include <boost/program_options.hpp>
 
 std::string mdadm_path;
 std::string from_address;
@@ -62,12 +58,14 @@ int main (int argc, char **argv) {
         boost::program_options::variables_map vm;
         boost::program_options::command_line_style::allow_long_disguise;
         store(parse_command_line(argc, argv, desc), vm);
-        notify(vm);
 
         if (vm.count("help")) {
             std::cout << desc << '\n';
-
+            return 0;
         }
+
+        notify(vm);
+
         if (vm.count("from-address")) {
             from_address = vm["from-address"].as<std::string>();
         }
