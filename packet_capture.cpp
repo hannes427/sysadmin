@@ -28,7 +28,7 @@ int startcapture (int argc, char **argv) {
         ("ip_version", boost::program_options::value<std::string>(), "Filter on IP version (ip or ip6)")
         ("protocol", boost::program_options::value<std::string>(), "Filter on protocol (tcp, udp, icmp, arp)")
         ("host_address", boost::program_options::value<std::string>(), "Filter on Host (source and destination)")
-        ("port", boost::program_options::value<std::string>(), "Filter on port")
+        ("port", boost::program_options::value<std::string>(), "Filter on port e.g. '80' or '80-85' ")
         ("path", boost::program_options::value<std::string>(), "Path to the dump-file");
 
         boost::program_options::variables_map vm;
@@ -82,10 +82,20 @@ int startcapture (int argc, char **argv) {
         }
         if (vm.count("port")) {
             if(filter == true) {
-                filter_on = filter_on+" and port "+vm["port"].as<std::string>();
+				if (vm["port"].as<std::string>().find("-")) { //port range was given
+					filter_on = filter_on+" and portrange "+vm["port"].as<std::string>();
+				}
+				else {
+					filter_on = filter_on+" and port "+vm["port"].as<std::string>();
+				}
             }
             else {
-                filter_on = filter_on+" port"+vm["port"].as<std::string>();
+				if (vm["port"].as<std::string>().find("-")) { //port range was given
+					filter_on = filter_on+" portrange "+vm["port"].as<std::string>();
+				}
+				else {
+					filter_on = filter_on+" port "+vm["port"].as<std::string>();
+				}
                 filter = true;
             }
         }
