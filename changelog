@@ -1,5 +1,6 @@
 systemadmin (1.0.0-4) UNRELEASED; urgency=medium
   * Add Bond-Support for network
+  * Add port range support for packet capture
 
  -- Hannes Rusch <hannes.rusch@web.de>  Mon, 02 June 2025 07:51:58 +0200
 
